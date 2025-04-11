@@ -31,6 +31,7 @@ Here's a brief overview of the project's development history:
 * Please use requirements.txt if you use pip
 
 ```python
+# install all the dependencies
 pip install -r requirements.txt
 # Use environment.yml if you use conda
 
