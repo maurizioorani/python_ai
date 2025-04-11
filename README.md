@@ -27,7 +27,7 @@ Here's a brief overview of the project's development history:
 ## Getting Started 
 
 ## Ensure you have Ollama installed and running locally (http://localhost:11434). 
-##You need to pip install other packages.
+## You also need to pip install other packages.
 ## Please use requirements.txt if you use pip
 ```markdown
 ```python
