@@ -24,14 +24,14 @@ Here's a brief overview of the project's development history:
     * **feat: Add intelligent link extraction for business description (inference_with_knowledge.py)**
         * Implemented the functionality to scrape website links and use AI to identify relevant URLs for describing a company's core business.
 
-## Getting Started (Optional - if you were to include setup instructions)
+## Getting Started 
 
-*(You would typically include instructions here on how to run the applications, such as installing dependencies and running Ollama.)*
-
-For example:
-
-```bash
-# Ensure you have Ollama installed and running locally (http://localhost:11434)
+# Ensure you have Ollama installed and running locally (http://localhost:11434). You need to pip install other packages.
+# Please use requirements.txt if you use pip
+```markdown
+```python
+pip install -r requirements.txt
+# Use environment.yml if you use conda
 
 # For simpleChat.py:
 python simpleChat.py
