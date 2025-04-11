@@ -29,15 +29,18 @@ Here's a brief overview of the project's development history:
 ## Ensure you have Ollama installed and running locally (http://localhost:11434). 
 ## You also need to pip install other packages.
 ## Please use requirements.txt if you use pip
+
 ```markdown
 ```python
 pip install -r requirements.txt
+
 # Use environment.yml if you use conda
-```markdown
-```python
 # For simpleChat.py:
-python simpleChat.py
 ```markdown
 ```python
+python simpleChat.py
+
 # For inference_with_knowledge.py:
+```markdown
+```python
 python inference_with_knowledge.py [https://www.example-website.com](https://www.example-website.com)
