@@ -10,7 +10,7 @@ This application provides a basic interface to chat with a locally running Ollam
 
 ### 2. Intelligent Link Extraction from Websites (inference_with_knowledge.py)
 
-This more advanced application scrapes the links from a specified website and leverages the local Ollama AI to identify the URLs most relevant to understanding the company's core business. This could be useful for tasks like automatically generating a list of key pages (e.g., "About Us", "Careers") for a company brochure.
+This more advanced application scrapes the links from a specified website and leverages the local Ollama AI to identify the most relevant URLs to understand companies' core business. This could be useful for tasks like automatically generating a list of key pages (e.g., "About Us", "Careers") for a company brochure.
 
 ## Commit History
 
