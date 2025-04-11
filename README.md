@@ -32,12 +32,10 @@ Here's a brief overview of the project's development history:
 
 ```python
 pip install -r requirements.txt
-
 # Use environment.yml if you use conda
+
 # For simpleChat.py:
-```python
 python simpleChat.py
 
 # For inference_with_knowledge.py:
-```python
 python inference_with_knowledge.py [https://www.example-website.com](https://www.example-website.com)
