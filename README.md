@@ -51,7 +51,7 @@ Here's a brief overview of the project's development history:
     * **feat: RAG system (RAG_example.py)**
         * Implemented the functionality to read md files in a given directory, store chunks of text in a vector database and integrate the knowledge into the local LLM
 
-## Getting Started 
+## Usage
 
 * Ensure you have Ollama installed and running locally (http://localhost:11434). 
 * You also need to pip install other packages.
@@ -66,4 +66,7 @@ pip install -r requirements.txt
 python simpleChat.py
 
 # For inference_with_knowledge.py:
-python inference_with_knowledge.py [https://www.example-website.com](https://www.example-website.com)
+python inference_with_knowledge.py [https://www.example-website.com]
+
+# For RAG_example.py:
+python RAG_example.py. Browse to http://localhost:7860, upload a PDF document and query the LLM with questions about the content.
