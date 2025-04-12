@@ -12,7 +12,7 @@ This application provides a basic interface to chat with a locally running Ollam
 
 This more advanced application scrapes the links from a specified website and leverages the local Ollama AI to identify the most relevant URLs to understand companies' core business. This could be useful for tasks like automatically generating a list of key pages (e.g., "About Us", "Careers") for a company brochure.
 
-### 3. RAG System with Ollama
+### 3. RAG System with Ollama (RAG_example.py)
 
 AI-powered question-answering system for markdown documentation using Ollama and LangChain.
 
@@ -48,7 +48,7 @@ Here's a brief overview of the project's development history:
         * Implemented the functionality to scrape website links and use AI to identify relevant URLs for describing a company's core business.
 
 * **2025-04-12:**
-    * **feat: RAG system (inference_with_knowledge.py)**
+    * **feat: RAG system (RAG_example.py)**
         * Implemented the functionality to read md files in a given directory, store chunks of text in a vector database and integrate the knowledge into the local LLM
 
 ## Getting Started 
