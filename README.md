@@ -61,12 +61,19 @@ Here's a brief overview of the project's development history:
 # install all the dependencies
 pip install -r requirements.txt
 # Use environment.yml if you use conda
-
+```
 # For simpleChat.py:
+```
 python simpleChat.py
+```
 
 # For inference_with_knowledge.py:
+```
 python inference_with_knowledge.py [https://www.example-website.com]
+```
 
 # For RAG_example.py:
-python RAG_example.py. Browse to http://localhost:7860, upload a PDF document and query the LLM with questions about the content.
+```
+python RAG_example.py.
+```
+thenrowse to http://localhost:7860, upload a PDF document and query the LLM with questions about the content.
