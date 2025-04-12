@@ -1,4 +1,4 @@
-# Simple Chat with Local Ollama and Intelligent Link Extraction
+# AI PROJECTS - Python, langchain and local LLMs
 
 This project demonstrates some simple applications showcasing interaction with a local Ollama instance for different tasks.
 
