@@ -1,4 +1,4 @@
-# AI PROJECTS - Python, langchain and local LLMs
+# AI PROJECTS - Python, LangChain and local LLMs
 
 This project demonstrates some simple applications showcasing interaction with a local Ollama instance for different tasks.
 
