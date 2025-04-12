@@ -14,14 +14,13 @@ This more advanced application scrapes the links from a specified website and le
 
 ### 3. RAG System with Ollama (RAG_example.py)
 
-AI-powered question-answering system for markdown documentation using Ollama and LangChain.
+AI-powered question-answering system for PDF / markdown documentation using Ollama and LangChain.
 
 ## Features
 
-- 📄 Processes markdown files into vector database
-- 🤖 Powered by Ollama models (default: Mistral)
+- 📄 Processes PDF or markdown files into vector database for persistent data into Chroma DB
+- 🤖 Powered by Ollama models (default: llama3.2)
 - 🔍 Interactive Gradio web interface
-- 🗂️ Persistent vector storage with ChromaDB
 - 📚 Maintains conversation history
 - 📋 Shows answer sources from original documents
 
