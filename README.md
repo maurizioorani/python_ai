@@ -34,9 +34,9 @@ pip install -r RAG_requirements.txt
 # Pull required Ollama models
 ollama pull mistral
 ollama pull nomic-embed-text
+```
 
 ## Commit History
-
 Here's a brief overview of the project's development history:
 
 * **2025-04-10:**
