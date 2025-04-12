@@ -31,7 +31,7 @@ AI-powered question-answering system for PDF / markdown documentation using Olla
 pip install -r RAG_requirements.txt
 
 # Pull required Ollama models
-ollama pull mistral
+ollama pull llama3.2:latest
 ollama pull nomic-embed-text
 ```
 
