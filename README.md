@@ -76,4 +76,4 @@ python inference_with_knowledge.py [https://www.example-website.com]
 ```
 python RAG_example.py.
 ```
-thenrowse to http://localhost:7860, upload a PDF document and query the LLM with questions about the content.
+then browse to http://localhost:7860, upload a PDF document and query the LLM with questions about the content.
