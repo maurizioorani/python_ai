@@ -53,13 +53,13 @@ Here's a brief overview of the project's development history:
 ## Usage
 
 * Ensure you have Ollama installed and running locally (http://localhost:11434). 
-* You also need to pip install other packages.
-* Please use requirements.txt if you use pip
+* You also need install other packages.
 
 ```python
-# install all the dependencies
+# install all the dependencies with pip:
 pip install -r requirements.txt
-# Use environment.yml if you use conda
+# install all the dependencies with conda
+conda install .\environment.yml 
 ```
 # For simpleChat.py:
 ```
