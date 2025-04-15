@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 import gradio as gr
 import tiktoken
 from langchain_chroma import Chroma
@@ -8,13 +9,7 @@ from langchain_openai import OpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain_core.documents import Document
-from langchain_community.document_loaders import (
-    PyPDFLoader,
-    TextLoader,
-    UnstructuredMarkdownLoader
-)
-from langchain_core.documents import Document
-import time
+from langchain_community.document_loaders import PyPDFLoader, TextLoader, UnstructuredMarkdownLoader
 
 # Constants
 CHROMA_DIR = os.path.join(tempfile.gettempdir(), "chroma_db")
@@ -26,13 +21,27 @@ LLM_CONFIG = {
     "streaming": True
 }
 CHAT_COLLECTION = "chat_history"
+DOC_LOADERS = {".pdf": PyPDFLoader, ".txt": TextLoader, ".md": UnstructuredMarkdownLoader}
 
-# Document loaders registry
-DOC_LOADERS = {
-    ".pdf": PyPDFLoader,
-    ".txt": TextLoader,
-    ".md": UnstructuredMarkdownLoader
-}
+class ChromaManager:
+    @staticmethod
+    def get_db(collection_name=None):
+        """Get Chroma DB instance with optional collection name"""
+        kwargs = {"persist_directory": CHROMA_DIR, "embedding_function": EMBEDDINGS}
+        if collection_name:
+            kwargs["collection_name"] = collection_name
+        return Chroma(**kwargs)
+
+    @staticmethod
+    def delete_all(collection_name=None):
+        """Delete all documents from a collection"""
+        try:
+            db = ChromaManager.get_db(collection_name)
+            db.delete_collection()
+            db = ChromaManager.get_db(collection_name)  # Recreate empty collection
+            return True
+        except Exception:
+            return False
 
 def load_document(file_path):
     """Load documents based on file extension"""
@@ -41,203 +50,160 @@ def load_document(file_path):
         return loader(file_path).load()
     raise ValueError(f"Unsupported file type: {ext}")
 
-def get_chroma_db():
-    """Get or create Chroma database instance"""
-    return Chroma(persist_directory=CHROMA_DIR, embedding_function=EMBEDDINGS)
-
 def store_documents(files):
     """Store documents in Chroma vector DB"""
-    os.makedirs(CHROMA_DIR, exist_ok=True)
-    db = get_chroma_db()
-    
-    all_docs = []
-    for file in files:
-        all_docs.extend(load_document(file.name))
-    
-    db.add_documents(all_docs)
-    return f"✅ Successfully stored {len(all_docs)} documents in Chroma DB!"
-
-def count_tokens(text, model_name="gpt-3.5-turbo"):
-    """Count tokens in text using tiktoken"""
+    if not files:
+        return "❌ No files selected"
     try:
-        return len(tiktoken.encoding_for_model(model_name).encode(text))
-    except Exception:
-        return 0
+        os.makedirs(CHROMA_DIR, exist_ok=True)
+        db = ChromaManager.get_db()
+        all_docs = []
+        for file in files:
+            all_docs.extend(load_document(file.name))
+        db.add_documents(all_docs)
+        return f"✅ Stored {len(all_docs)} documents successfully!"
+    except Exception as e:
+        return f"❌ Error storing documents: {str(e)}"
 
 def create_qa_chain():
-    """Create preconfigured QA chain"""
+    """Create QA chain with RAG"""
     llm = OpenAI(**LLM_CONFIG)
     prompt = PromptTemplate(
         input_variables=["context", "question"],
-        template="""You are an expert assistant. Use the context to answer accurately.
-        If you don't know the answer, say "I don't know".\n\n
-        Context:\n{context}\n\nQuestion:\n{question}\nAnswer:"""
+        template=(
+            "You are an expert assistant. Use the context to answer accurately.\n"
+            "If you don't know the answer, say \"I don't know\".\n\n"
+            "Context:\n{context}\n\nQuestion:\n{question}\nAnswer:"
+        )
     )
-    
     return RetrievalQA.from_chain_type(
         llm=llm,
-        retriever=get_chroma_db().as_retriever(search_kwargs={"k": 3}),
+        retriever=ChromaManager.get_db().as_retriever(search_kwargs={"k": 3}),
         chain_type="stuff",
         return_source_documents=True,
         chain_type_kwargs={"prompt": prompt}
     )
 
-def save_chat_history(history):
-    """Save chat history as documents in Chroma DB (in a separate collection)."""
-    chroma_dir = os.path.join(tempfile.gettempdir(), "chroma_db")
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    db = Chroma(
-        persist_directory=chroma_dir,
-        embedding_function=embeddings,
-        collection_name=CHAT_COLLECTION
-    )
-    docs = []
-    for i, msg in enumerate(history):
-        # Add a timestamp if not present
-        metadata = {
-            "role": msg["role"],
-            "index": i,
-            "timestamp": msg.get("timestamp", time.time())
-        }
-        docs.append(
+class ChatManager:
+    @staticmethod
+    def save_history(history):
+        """Save chat history to Chroma DB"""
+        if not history:
+            return
+        db = ChromaManager.get_db(CHAT_COLLECTION)
+        docs = [
             Document(
                 page_content=msg["content"],
-                metadata=metadata
+                metadata={"role": msg["role"], "index": i, "timestamp": msg.get("timestamp", time.time())}
             )
-        )
-    if docs:
+            for i, msg in enumerate(history)
+        ]
         db.add_documents(docs)
 
-def load_chat_history():
-    """Load chat history from Chroma DB (from the chat_history collection)."""
-    chroma_dir = os.path.join(tempfile.gettempdir(), "chroma_db")
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    db = Chroma(
-        persist_directory=chroma_dir,
-        embedding_function=embeddings,
-        collection_name=CHAT_COLLECTION
-    )
-    try:
-        docs = db.get()
-        if not docs or not docs["documents"]:
+    @staticmethod
+    def load_history():
+        """Load chat history from Chroma DB"""
+        try:
+            db = ChromaManager.get_db(CHAT_COLLECTION)
+            docs = db.get()
+            if not docs or not docs["documents"]:
+                return []
+            chat = [
+                {
+                    "role": meta.get("role", "user"),
+                    "content": doc,
+                    "timestamp": meta.get("timestamp", 0)
+                }
+                for doc, meta in zip(docs["documents"], docs["metadatas"])
+            ]
+            return sorted(chat, key=lambda x: (x.get("timestamp", 0), x.get("role", "")))
+        except Exception:
             return []
-        # Sort by timestamp (or index as fallback)
-        chat = [
-            {
-                "role": meta.get("role", "user"),
-                "content": doc,
-                "timestamp": meta.get("timestamp", 0)
-            }
-            for doc, meta in zip(docs["documents"], docs["metadatas"])
-        ]
-        chat.sort(key=lambda x: (x.get("timestamp", 0), x.get("role", "")))
-        return chat
-    except Exception:
-        return []
+
+    @staticmethod
+    def delete_history():
+        """Delete chat history"""
+        return "🗑️ Chat history deleted!" if ChromaManager.delete_all(CHAT_COLLECTION) else "❌ Error deleting chat history"
 
 def process_query(message, history):
-    """Process user query and generate response"""
-    import time
-    # Ensure message is a string
-    if isinstance(message, list):
-        message = message[-1] if message else ""
+    """Process user query and update chat history"""
     if not isinstance(message, str):
-        message = str(message)
+        message = str(message) if message else ""
+    
     result = create_qa_chain()({"query": message})
     answer = result["result"]
     sources = "\n".join(doc.metadata.get("source", "N/A") for doc in result["source_documents"])
-    user_tokens = count_tokens(message)
-    answer_tokens = count_tokens(answer)
-    token_info = f"🔢 Tokens: User {user_tokens}, Assistant {answer_tokens}, Total {user_tokens + answer_tokens}"
+    
     timestamp = time.time()
     new_history = history + [
         {"role": "user", "content": message, "timestamp": timestamp},
-        {"role": "assistant", "content": f"{answer}\n\n**Sources:**\n{sources}\n\n{token_info}", "timestamp": timestamp + 0.0001}
+        {
+            "role": "assistant",
+            "content": f"{answer}\n\n**Sources:**\n{sources}\n\n🔢 Tokens: "
+                      f"User {len(message.split())}, Assistant {len(answer.split())}, "
+                      f"Total {len(message.split()) + len(answer.split())}",
+            "timestamp": timestamp + 0.0001
+        }
     ]
-    save_chat_history(new_history)
-    # Sort and format for gr.Chatbot (type="messages")
-    sorted_history = sorted(new_history, key=lambda x: x.get("timestamp", 0))
-    messages = [{"role": msg["role"], "content": msg["content"]} for msg in sorted_history]
+    ChatManager.save_history(new_history)
+    messages = [{"role": msg["role"], "content": msg["content"]} 
+               for msg in sorted(new_history, key=lambda x: x.get("timestamp", 0))]
     return new_history, messages, ""
 
-def delete_documents():
-    """Delete all documents from vector DB"""
-    if os.path.exists(CHROMA_DIR):
-        for root, dirs, files in os.walk(CHROMA_DIR, topdown=False):
-            for name in files + dirs:
-                os.remove(os.path.join(root, name)) if files else os.rmdir(os.path.join(root, name))
-        os.rmdir(CHROMA_DIR)
-        return "🗑️ All documents deleted!"
-    return "No database found!"
-
-def delete_chat_history():
-    """Delete all chat history from the chat_history collection in Chroma DB."""
-    chroma_dir = os.path.join(tempfile.gettempdir(), "chroma_db")
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    try:
-        db = Chroma(
-            persist_directory=chroma_dir,
-            embedding_function=embeddings,
-            collection_name=CHAT_COLLECTION
-        )
-        # Remove all documents in the chat_history collection
-        db._collection.delete(where={})  # Use the underlying Chroma collection's delete method
-        return "🗑️ Chat history deleted!"
-    except Exception as e:
-        return f"Error deleting chat history: {e}"
-
-def show_history(history):
-    # Return chat history as a list of dicts for gr.Chatbot with type="messages"
-    if not history:
-        return gr.update(value=[], visible=True)
-    # Sort by timestamp to ensure correct order
-    sorted_history = sorted(history, key=lambda x: x.get("timestamp", 0))
-    messages = [{"role": msg["role"], "content": msg["content"]} for msg in sorted_history]
-    return gr.update(value=messages, visible=True)
-
-# Gradio UI setup
 def create_interface():
+    """Create Gradio interface"""
     with gr.Blocks(theme=gr.themes.Soft(primary_hue="violet")) as demo:
-        gr.Markdown("""<h1 style='text-align:center; color:#6C63FF;'>
-            📚 RAG System with local LLM and Chroma DB</h1>""")
+        gr.Markdown(
+            """<h1 style='text-align:center; color:#6C63FF;'>
+            📚 RAG System with local LLM and Chroma DB</h1>"""
+        )
         
-        # 1. Chat interface tab
         with gr.Tab("Chat"):
             chatbot = gr.Chatbot(label="Chat History", type="messages")
             msg = gr.Textbox(placeholder="Ask about your documents...")
-            state = gr.State(load_chat_history())
-
-            del_chat_btn = gr.Button("Delete Conversation History")
-
-            def submit(history, message):
-                return process_query(message, history)
-            msg.submit(submit, [state, msg], [state, chatbot, msg])
-            gr.Button("Send").click(submit, [state, msg], [state, chatbot, msg])
-
-            del_chat_btn.click(delete_chat_history)
+            state = gr.State(ChatManager.load_history())
+            
+            with gr.Row():
+                send_btn = gr.Button("Send")
+                del_chat_btn = gr.Button("🗑️ Clear History")
+            
+            msg.submit(process_query, [state, msg], [state, chatbot, msg])
+            send_btn.click(process_query, [state, msg], [state, chatbot, msg])
+            del_chat_btn.click(ChatManager.delete_history)
         
-        # 2. Document management tab 
         with gr.Tab("Upload & Store"):
             gr.Markdown("Upload PDF/TXT/MD files to vector database")
             file_input = gr.File(file_types=list(DOC_LOADERS), file_count="multiple")
             status_box = gr.Textbox(label="Status")
-            upload_btn = gr.Button("Store 🚀")
-            upload_btn.click(store_documents, inputs=file_input, outputs=status_box)
+            gr.Button("Store 🚀").click(store_documents, inputs=file_input, outputs=status_box)
         
-        # 3. Database management
         with gr.Tab("Manage"):
-            del_status = gr.Textbox(label="Delete Status")
-            gr.Button("🗑️ Delete All").click(delete_documents, outputs=del_status)
-            docs_output = gr.Markdown()
-            def list_docs():
-                docs = get_chroma_db().get()
-                if not docs or not docs["documents"]:
-                    return "No documents"
-                return "\n---\n".join(
-                    f"**Document {i+1}:**\n{doc}\n*Metadata:* {docs['metadatas'][i] if docs['metadatas'] else {}}"
-                    for i, doc in enumerate(docs["documents"])
-                )
-            gr.Button("📄 List Docs").click(list_docs, outputs=docs_output)
+            with gr.Column():  # Use gr.Column for vertical layout
+                delete_status = gr.Textbox(label="Delete Status")
+                delete_button = gr.Button("🗑️ Delete All Documents")
+                list_output = gr.Markdown()
+                list_button = gr.Button("📄 List Documents")
+
+            delete_button.click(
+                lambda: "🗑️ Documents deleted!" if ChromaManager.delete_all() else "❌ Error deleting documents",
+                outputs=delete_status
+            )
+            list_button.click(
+                lambda: "\n---\n".join(
+                    f"**Document {i+1}:**\n{doc}\n*Metadata:* {meta}"
+                    for i, (doc, meta) in enumerate(zip(
+                        ChromaManager.get_db().get().get("documents", []),
+                        ChromaManager.get_db().get().get("metadatas", [])
+                    ))
+                ) or "No documents found",
+                outputs=list_output
+            )
+        
+        gr.Markdown(
+            "<div style='text-align: center; margin-top: 2em; color: #888;'>"
+            "Created by Maurizio Orani"
+            "</div>"
+        )
     
     return demo
 
