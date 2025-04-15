@@ -35,7 +35,7 @@ It allows you to upload your documents (PDF, TXT, MD), ask questions about their
 
 1.  **Clone the Repository:** 💻
     ```bash
-    git clone https://github.com/maurizioorani/python_ai/tree/main
+    git clone github.com:maurizioorani/python_ai.git
     ```
 
 2.  **Create a Virtual Environment (Recommended):** 🌱
