@@ -127,15 +127,20 @@ class ChatManager:
 
 def process_query(message, history):
     """Process user query and update chat history"""
+    # Ensure message is a string
     if not isinstance(message, str):
         message = str(message) if message else ""
+    
+    # Ensure history is a list
+    if not isinstance(history, list):
+        history = []
     
     result = create_qa_chain()({"query": message})
     answer = result["result"]
     sources = "\n".join(doc.metadata.get("source", "N/A") for doc in result["source_documents"])
     
     timestamp = time.time()
-    new_history = history + [
+    new_messages = [
         {"role": "user", "content": message, "timestamp": timestamp},
         {
             "role": "assistant",
@@ -145,9 +150,14 @@ def process_query(message, history):
             "timestamp": timestamp + 0.0001
         }
     ]
+    
+    new_history = history + new_messages
     ChatManager.save_history(new_history)
+    
+    # Format messages for display
     messages = [{"role": msg["role"], "content": msg["content"]} 
                for msg in sorted(new_history, key=lambda x: x.get("timestamp", 0))]
+    
     return new_history, messages, ""
 
 def create_interface():
@@ -159,17 +169,35 @@ def create_interface():
         )
         
         with gr.Tab("Chat"):
-            chatbot = gr.Chatbot(label="Chat History", type="messages")
-            msg = gr.Textbox(placeholder="Ask about your documents...")
+            chatbot = gr.Chatbot(label="Chat History", type="messages", height=400)  # Added height
+            msg = gr.Textbox(
+                placeholder="Ask about your documents...",
+                label="Your message",  # Added label
+                interactive=True,      # Ensure textbox is interactive
+                lines=2               # Make textbox bigger
+            )
             state = gr.State(ChatManager.load_history())
             
             with gr.Row():
                 send_btn = gr.Button("Send")
                 del_chat_btn = gr.Button("🗑️ Clear History")
             
-            msg.submit(process_query, [state, msg], [state, chatbot, msg])
-            send_btn.click(process_query, [state, msg], [state, chatbot, msg])
-            del_chat_btn.click(ChatManager.delete_history)
+            # Update process_query outputs to clear textbox
+            def on_submit(history, message):
+                if message.strip() == "":  # Don't process empty messages
+                    return history, [], message
+                new_history, messages, _ = process_query(message, history)
+                return new_history, messages, ""  # Empty string to clear textbox
+            
+            msg.submit(on_submit, [state, msg], [state, chatbot, msg])
+            send_btn.click(on_submit, [state, msg], [state, chatbot, msg])
+            
+            # Update delete history to clear chat
+            def clear_chat():
+                ChatManager.delete_history()
+                return [], [], ""  # Clear history, chatbot, and textbox
+            
+            del_chat_btn.click(clear_chat, outputs=[state, chatbot, msg])
         
         with gr.Tab("Upload & Store"):
             gr.Markdown("Upload PDF/TXT/MD files to vector database")
