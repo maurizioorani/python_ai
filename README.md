@@ -101,6 +101,8 @@ python RAG_example.py
 ```
 Then, open your web browser and navigate to http://localhost:7860 🌐. You should see the Gradio interface where you can upload documents and interact with the RAG system.
 
+Please note: For optimal performance in languages other than English, consider using larger models or those specifically trained for multilingual tasks, as smaller CPU-only models may produce unexpected results due to limited non-English training.
+
 # AI additional applications 🚀
 
 ## 2. Simple Chat with Ollama (`simpleChat.py`) 💬🤖  
