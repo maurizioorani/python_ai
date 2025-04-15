@@ -127,29 +127,6 @@ Advanced web analysis tool featuring:
 
 ---
 
-## 📜 Commit History  
-
-**🗓️ 2025-04-12**  
-🚀 `feat`: RAG System (`RAG_example.py`)  
-- Multi-format document processing  
-- ChromaDB vector storage integration  
-- Gradio-powered QA interface  
-
-**🗓️ 2025-04-11**  
-🔗 `feat`: Intelligent Link Extraction  
-- Robust web scraping framework  
-- AI relevance scoring system  
-- Business-focused URL filtering  
-
-**🗓️ 2025-04-10**  
-💬 `feat`: Base Chat Implementation  
-- CLI chat interface foundation  
-- Ollama-LangChain integration  
-- Basic conversation template  
-
-*Note: Example dates shown for illustration*
-
----
 
 ## 🚀 Usage Guide  
 
