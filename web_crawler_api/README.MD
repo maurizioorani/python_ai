@@ -31,7 +31,7 @@ The following Python libraries are required to run this project. You can install
 
 ```bash
 pip install -r requirements.txt
-```bash
+```
 
 The requirements.txt file should contain:
 
@@ -45,7 +45,7 @@ uvicorn
 pydantic
 crawl4ai
 openai
-```bash
+```
 
 ## Setup
 Clone the repository (if you haven't already).
