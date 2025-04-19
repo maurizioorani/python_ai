@@ -1,0 +1,18 @@
+gradio
+langchain
+langchain-community
+langchain-huggingface
+langchain-chroma
+langchain-openai
+tiktoken
+unstructured[all-docs]
+sentence-transformers
+pypdf
+markdown
+transformers
+torch
+# For Chroma vector store
+chromadb
+# For Ollama/OpenAI compatible LLMs
+openai
+
