@@ -4,7 +4,7 @@ This project demonstrates applications showcasing interaction with a local **Oll
 
 ## ✨ Applications
 
-### 1. RAG System with Local LLM (Ollama) and ChromaDB (`RAG_example.py`) 📚🔍
+### 1.0 RAG System with Local LLM (Ollama) and ChromaDB (`RAG_example.py`) 📚🔍
 
 This project implements a **Retrieval-Augmented Generation (RAG)** system using:
 * A local Large Language Model (LLM) served by **Ollama** 🦙
@@ -102,6 +102,10 @@ python RAG_example.py
 Then, open your web browser and navigate to http://localhost:7860 🌐. You should see the Gradio interface where you can upload documents and interact with the RAG system.
 
 Please note: For optimal performance in languages other than English, consider using larger models or those specifically trained for multilingual tasks, as smaller CPU-only models may produce unexpected results due to limited non-English training.
+
+### 1.1 Advanced RAG with Local LLM (Ollama) and Streamlit (`advanced_rag/chat_advanced.py`) 📚🔍
+
+This project provides a more sophisticated **Retrieval-Augmented Generation (RAG)** system, enhanced with document management capabilities using metadata for precise file deletion. See its dedicated Readme for details.
 
 # AI additional applications 🚀
 
