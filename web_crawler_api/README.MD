@@ -62,14 +62,14 @@ To start the FastAPI application, run the following command in your terminal:
 
 ```bash
 python main.py
-```bash
+```
 
 This will start the API server, typically accessible at http://127.0.0.1:8000.
 
 ```bash
 API Endpoints
 POST /crawl
-```bash
+```
 
 Crawls a list of provided URLs and stores their content in the ChromaDB.
 
@@ -82,10 +82,14 @@ Request Body:
   "urls": ["[https://example.com/doc1](https://example.com/doc1)", "[https://example.org/guide](https://example.org/guide)"],
   "max_concurrent": 5
 }
+
+```
+
 urls: A list of HTTP or HTTPS URLs to crawl (required).
 max_concurrent: An optional integer specifying the maximum number of concurrent crawling tasks (default: 5).
+
 Response:
-```json
+
 
 ```json
 {
@@ -93,7 +97,7 @@ Response:
   "message": "Processed 2 URLs"
 }
 In case of an error, it will return an HTTP 500 status code with a JSON response containing the error details.
-```json
+```
 
 GET /query
 Queries the ChromaDB for document chunks that are semantically similar to the provided query.
@@ -113,7 +117,7 @@ Response:
   "metadatas": [[{"url": "...", "chunk_number": 0, ...}, {"url": "...", "chunk_number": 2, ...}, ...]]
 }
 
-```json
+```
 
 In case of an error, it will return an HTTP 500 status code with a JSON response containing the error details.
 
@@ -126,7 +130,7 @@ You can send a POST request to the /crawl endpoint with a JSON payload containin
 curl -X POST -H "Content-Type: application/json" -d '{"urls": ["[https://ai.pydantic.dev/latest/](https://ai.pydantic.dev/latest/)", "[https://ai.pydantic.dev/blog/](https://ai.pydantic.dev/blog/)"]}' [http://127.0.0.1:8000/crawl](http://127.0.0.1:8000/crawl)
 You can also specify the concurrency:
 
-```bash
+```
 
 curl -X POST -H "Content-Type: application/json" -d '{"urls": ["[https://example.com/doc](https://example.com/doc)"], "max_concurrent": 10}' [http://127.0.0.1:8000/crawl](http://127.0.0.1:8000/crawl)
 Querying Documents
@@ -137,7 +141,7 @@ You can send a GET request to the /query endpoint with the q parameter containin
 curl "[http://127.0.0.1:8000/query?q=What](http://127.0.0.1:8000/query?q=What) is Pydantic AI?"
 You can also specify the number of results:
 
-```bash
+```
 
 curl "[http://127.0.0.1:8000/query?q=How](http://127.0.0.1:8000/query?q=How) to use the crawler&n_results=3"
 
