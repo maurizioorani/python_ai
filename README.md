@@ -4,7 +4,7 @@ This project demonstrates applications showcasing interaction with a local **Oll
 
 ## ✨ Applications
 
-### 1.0 RAG System with Local LLM (Ollama) and ChromaDB (`RAG_example.py`) 📚🔍
+### 1.0 RAG System with Local LLM (Ollama) and ChromaDB (`basic_rag\RAG_example.py`) 📚🔍
 
 This project implements a **Retrieval-Augmented Generation (RAG)** system using:
 * A local Large Language Model (LLM) served by **Ollama** 🦙
@@ -107,7 +107,7 @@ Please note: For optimal performance in languages other than English, consider u
 
 This project provides a more sophisticated **Retrieval-Augmented Generation (RAG)** system, enhanced with document management capabilities using metadata for precise file deletion. See its dedicated Readme for details.
 
-# AI additional applications 🚀
+# AI additional applications (ai_test folder) 🚀
 
 ## 2. Simple Chat with Ollama (`simpleChat.py`) 💬🤖  
 A minimalist command-line interface for interacting with locally hosted Ollama models. Perfect for:  
